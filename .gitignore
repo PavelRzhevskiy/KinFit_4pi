@@ -1,0 +1,8 @@
+*.root
+*.so
+*.o
+*.d
+*.pcm
+*.png
+*newroots*
+4pi_ana

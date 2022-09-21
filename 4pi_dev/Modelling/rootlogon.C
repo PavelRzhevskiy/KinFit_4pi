@@ -1,0 +1,12 @@
+{
+  gSystem->AddIncludePath("-I/spoolA/przhevskiy/kinfit/install/eigen/include/eigen3");
+  gSystem->AddIncludePath("-I/spoolA/przhevskiy/kinfit/install/KFCmd/include");
+  gSystem->AddIncludePath("-I/spoolA/przhevskiy/include/eigen3");
+  gSystem->AddIncludePath("-I/spoolA/przhevskiy/kinfit/install/KFBase/include");
+  gSystem->AddDynamicPath("/spoolA/przhevskiy/kinfit/install/KFBase/lib");
+  gSystem->AddDynamicPath("/spoolA/przhevskiy/kinfit/install/KFCmd/lib");
+  gSystem->Load("libkfbase_newtonian_opt");
+  gSystem->Load("libkfbase_core");
+  gSystem->Load("libkfcmd_core");
+  gSystem->Load("libkfcmd_hypos");
+}
