@@ -13,9 +13,14 @@ double Chi25C, Chi2Miss;
 int Err_Chi25C;
 int correspond[20] = {0};
 
-TTree* mytree = (TTree*)my_file.Get("tr_ph;11");
+
+
+TTree *mytree = (TTree*)my_file.Get("tr_ph;12");
+
+
+
 TTree* tree_err_5C = (TTree*)my_file.Get("tree_err_5C");
-int Nentries = mytree->GetEntries();
+int Nentries = mytree->GetEntriesFast();
 printf("N = %d\n", Nentries);
 
 mytree->SetBranchAddress("Lpip", &Pip);
@@ -31,7 +36,7 @@ mytree->SetBranchAddress("mode2", &mode2);
 mytree->SetBranchAddress("correspond", correspond);
 
 tree_err_5C->SetBranchAddress("Err_Chi25C", &Err_Chi25C);
-
+tree_err_6C->SetBranchAddress("Err_Chi26C", &Err_Chi25C);
 
 int counter_over = 0;
 int counter_all = 0;
@@ -43,8 +48,10 @@ TH1D hist_m2g0("M2g0", "M2g0", 200, 0.03, 0.3);
 TH1D hist_m2g_miss("M2g_miss", "M2g_miss", 200, 0.03, 0.3);
 TH1D hist_m2g0_miss("M2g0_miss", "M2g0_miss", 200, 0.03, 0.3);
 TH1D hist_Chi25C("Chi25C", "Chi25C", 2000, -1000, 1000);
+TH1D hist_Chi26C("Chi26C", "Chi26C", 2000, -1000, 1000);
 TH1D hist_Chi2Miss("Chi2Miss", "Chi2Miss", 2000, -1000, 1000);
-TH1D hist_err_5C("Err_5C", "Err_5C", 4, 0, 3);
+TH1D hist_err_5C("Err_5C", "Err_5C", 3, 0, 3);
+TH1D hist_err_6C("Err_5C", "Err_5C", 3, 0, 3);
 
 for(int i=0; i<Nentries; i++){
 	mytree->GetEntry(i);
@@ -57,11 +64,13 @@ for(int i=0; i<Nentries; i++){
 	}
 	if (mode1 == 1){
 		hist_Chi25C.Fill(Chi25C);
+		hist_Chi26C.Fill(Chi26C);
 	}
 	if (mode2 == 1){
 		hist_Chi2Miss.Fill(Chi2Miss);	
 	}
-	if (mode2 == 1 && Chi2Miss < 5){
+
+	if (mode2 == 1 && Chi2Miss < 10){
 		hist_m2g_miss.Fill(m2g_miss/1000.);
 		hist_m2g0_miss.Fill(m2g0_miss/1000.);
 	}
@@ -121,7 +130,7 @@ hist_m2g_miss.SetLineColor(kRed);
 hist_m2g_miss.GetXaxis()->SetRangeUser(0.11, 0.16);
 hist_m2g_miss.SetLineWidth(3);
 hist_m2g0_miss.SetLineWidth(3);
-hist_m2g_miss.SetTitle("0 < Chi25C < 50");
+hist_m2g_miss.SetTitle("0 < Chi2Miss < 10");
 hist_m2g_miss.Draw();
 hist_m2g0_miss.Draw("same");
 gPad->SetGrid();

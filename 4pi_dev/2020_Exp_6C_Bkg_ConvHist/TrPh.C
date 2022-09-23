@@ -23,7 +23,7 @@ int callLoop(std::string name_in = "root://sl10cmd//scan2020/scan2020_tr_ph_fc_e
   oldtree = (TTree*)oldfile->Get("tr_ph");
     
   TrPh myTrPh(oldtree);
-  myTrPh.Loop(name_out, 1.3);
+  myTrPh.Loop(name_out, 1.0);
  
   return 0;
 }
@@ -136,7 +136,9 @@ void TrPh::Loop(const std::string& outpath, double magneticField) {
     Hypo2ChPionsPi02Photons hypo_5C(2.e-3 * emeas, magneticField);
     Hypo2ChPions2pi0 hypo_6C(2.e-3 * emeas, magneticField);
     Hypo2ChPions2PhotonsLostPi0 hypo_miss(2.e-3 * emeas, magneticField);
-    for(Long64_t jentry=0; jentry<nentries; jentry++){
+    int runnum_switch = 90250;
+    int flag_m_switch = 0;
+    for(Long64_t jentry=2400000; jentry<2600000; jentry++){
 
         //Read entry:
     	Long64_t ientry = LoadTree(jentry);
@@ -147,6 +149,20 @@ void TrPh::Loop(const std::string& outpath, double magneticField) {
     	if(jentry%50000 == 0)  std::cout << (double)jentry/nentries << "  "  << std::endl;
 
 	if(fabs(ebeam - emeas)>50)emeas = ebeam;
+	hypo_5C.getParticle("origin")->fixParameter(3, 2.e-3*emeas);
+	hypo_6C.getParticle("origin")->fixParameter(3, 2.e-3*emeas);
+	hypo_miss.getParticle("origin")->fixParameter(3, 2.e-3*emeas);
+
+	hypo_5C.setBeamXY(xbeam, ybeam);
+	hypo_5C.fixVertexParameter("vtx0", 0, xbeam);
+        hypo_5C.fixVertexParameter("vtx0", 1, ybeam);
+	
+	if (runnum >= runnum_switch && flag_m_switch == 0){
+		flag_m_switch = 1;
+		hypo_5C.addConstant("#m-field", 1.3);
+		hypo_6C.addConstant("#m-field", 1.3);
+		hypo_miss.addConstant("#m-field", 1.3);
+	}
 
 	flag_5CCut = 0;
 	flag_6CCut = 0;
@@ -165,10 +181,13 @@ void TrPh::Loop(const std::string& outpath, double magneticField) {
 	Err_Chi2Miss = -10;
 
 
-        hypo_5C.setBeamXY(xbeam, ybeam);
-        hypo_5C.fixVertexParameter("vtx0", 0, xbeam);
-        hypo_5C.fixVertexParameter("vtx0", 1, ybeam);
-
+	
+	//
+	//std::cout << "M field = " << hypo_5C.getConstant("#m-field") << std::endl;
+       
+	
+	//std::cout << "ENERGY = " <<  hypo_5C.getParticle("origin")->getBeginParameters()(3) << std::endl;
+	
 	//initialize some vars
 	Chi25C = 500;
         TLorentzVector Pebeam(0.,0.,0.,2.*emeas);
@@ -280,6 +299,7 @@ void TrPh::Loop(const std::string& outpath, double magneticField) {
 
 
 			    hypo_5C.optimize();
+			    //std::cout << "ENERGY = " <<  hypo_5C.getParticle("origin")->getFinalParameters()(3) << std::endl;
 			    int err = hypo_5C.getErrorCode();
 			    flag_5CCut = 1;
 			    if (err == 0){
